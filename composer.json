@@ -59,7 +59,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "Laravel\\Notifications\\NotificationsServiceProvider"
+        "Laravel\\Notifications\\ServiceProvider"
       ]
     }
   }

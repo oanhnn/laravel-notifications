@@ -3,13 +3,15 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Handler Class Namespace
+    | Default notification settings
     |--------------------------------------------------------------------------
     |
-    | Here you may specify which namespace will be used for all generated handlers.
+    | Here you may specify which settings will be used for default notification settings.
     |
     */
-    'namespace' => '\\App\\Http\\Handlers',
+    'defaults' => [
+        'email' => true,
+    ],
 
     /*
     |--------------------------------------------------------------------------

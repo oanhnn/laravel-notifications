@@ -13,23 +13,12 @@ class CreateNotificationTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('notification_types', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('class_name');
-            $table->string('display_name');
-            $table->boolean('status')->default(true);
-        });
-
         Schema::create('notification_settings', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->morphs('notifiable');
-            $table->integer('type_id')->unsigned();
-            $table->boolean('status')->default(true);
+            $table->string('type')->comment('The class name of notification');
+            $table->json('channels')->default('{}');
             $table->timestamps();
-
-            $table->foreign('type_id')
-                ->references('id')->on('notification_types')
-                ->onDelete('cascade');
         });
     }
 
@@ -41,6 +30,5 @@ class CreateNotificationTypesTable extends Migration
     public function down()
     {
         Schema::dropIfExists('notification_settings');
-        Schema::dropIfExists('notification_types');
     }
 }

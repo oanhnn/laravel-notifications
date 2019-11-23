@@ -2,7 +2,10 @@
 
 namespace Laravel\Notifications;
 
+use Illuminate\Notifications\Events\NotificationSending;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
+use Laravel\Notifications\Listeners\NotificationFiltering;
 
 /**
  * Class ServiceProvider
@@ -22,13 +25,6 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         // register config
         $this->mergeConfigFrom(dirname(__DIR__) . '/config/notifications.php', 'notifications');
-
-        // register commands
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                Commands\MakeHandler::class,
-            ]);
-        }
     }
 
     /**
@@ -38,18 +34,34 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function boot()
     {
+        if ($this->app->runningInConsole()) {
+            $this->bootForConsole();
+        }
+
+        Event::listen(NotificationSending::class, NotificationFiltering::class);
+    }
+
+    /**
+     * Bootstrap the application services in console mode
+     *
+     * @return void
+     */
+    protected function bootForConsole(): void
+    {
         $pkg = dirname(__DIR__);
 
         // publish vendor resources
-        if ($this->app->runningInConsole()) {
-            $this->publishes(
-                [$pkg . '/config/notifications.php' => base_path('config/notifications.php')],
-                'laravel-notifications-config'
-            );
-            $this->publishes(
-                [$pkg . '/stubs/handler.stub' => resource_path('stubs/handler.stub')],
-                'laravel-notifications-stubs'
-            );
-        }
+        $this->publishes(
+            [$pkg . '/config/notifications.php' => base_path('config/notifications.php')],
+            'laravel-notifications-config'
+        );
+
+        $this->publishes(
+            [
+                $pkg . '/database/migrations/create_notification_settings_table.stub'
+                => database_path("migrations/2019_11_23_000000_create_notification_settings_table.php")
+            ],
+            'laravel-notifications-migrations'
+        );
     }
 }

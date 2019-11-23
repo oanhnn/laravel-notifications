@@ -23,7 +23,7 @@ class ServiceProviderTest extends TestCase
     /**
      * Test file notifications.php is existed in config directory after run
      *
-     * php artisan vendor:publish --provider="Laravel\\Notifications\\ServiceProvider" --tag=laravel-notifications-config
+     * php artisan vendor:publish --tag=laravel-notifications-config
      */
     public function testItShouldPublishVendorConfig()
     {
@@ -33,7 +33,6 @@ class ServiceProviderTest extends TestCase
         $this->assertFileNotExists($targetFile);
 
         $this->artisan('vendor:publish', [
-            '--provider' => 'Laravel\\Notifications\\ServiceProvider',
             '--tag' => 'laravel-notifications-config',
         ]);
 
@@ -42,20 +41,20 @@ class ServiceProviderTest extends TestCase
     }
 
     /**
-     * Test file handler.stubs is existed in resources/stubs directory after run
+     * Test migration file is existed in database/migrations directory after run
      *
-     * php artisan vendor:publish --provider="Laravel\\Notifications\\ServiceProvider" --tag=laravel-notifications-stubs
+     * php artisan vendor:publish --tag=laravel-notifications-migrations
      */
-    public function testItShouldPublishVendorStubs()
+    public function testItShouldPublishVendorMigrations()
     {
-        $sourceFile = dirname(dirname(__DIR__)) . '/stubs/handler.stub';
-        $targetFile = resource_path('stubs/handler.stub');
+        $sourceFile = dirname(dirname(__DIR__)) . '/database/migrations/create_notification_settings_table.php';
+        $targetFile = database_path('migrations/2019_11_23_000000_create_notification_settings_table.php');
 
         $this->assertFileNotExists($targetFile);
 
         $this->artisan('vendor:publish', [
-            '--provider' => 'Laravel\\Notifications\\ServiceProvider',
-            '--tag' => 'laravel-notifications-stubs',
+            // '--provider' => 'Laravel\\Notifications\\ServiceProvider',
+            '--tag' => 'laravel-notifications-migrations',
         ]);
 
         $this->assertFileExists($targetFile);
@@ -63,12 +62,33 @@ class ServiceProviderTest extends TestCase
     }
 
     /**
+     * Test vendor publishing on run
+     *
+     * php artisan vendor:publish --provider=Laravel\\Notifications\\ServiceProvider
+     */
+    public function testItShouldPublishVendors()
+    {
+        $configFile = base_path('config/notifications.php');
+        $migrationsFile = database_path('migrations/2019_11_23_000000_create_notification_settings_table.php');
+
+        $this->assertFileNotExists($configFile);
+        $this->assertFileNotExists($migrationsFile);
+
+        $this->artisan('vendor:publish', [
+            '--provider' => 'Laravel\\Notifications\\ServiceProvider',
+        ]);
+
+        $this->assertFileExists($configFile);
+        $this->assertFileExists($migrationsFile);
+    }
+
+    /**
      * Test default config values
      */
     public function testItShouldProvideDefaultConfig()
     {
-        $this->assertEquals(config('notifications.base'), Handler::class);
-        $this->assertEquals(config('notifications.namespace'), '\\App\\Http\\Notifications');
+        // TODO
+        $this->assertTrue(true);
     }
 
     /**
@@ -92,7 +112,7 @@ class ServiceProviderTest extends TestCase
     {
         $this->files->delete([
             base_path('config/notifications.php'),
-            resource_path('stubs/handler.stub'),
+            database_path('migrations/2019_11_23_000000_create_notification_settings_table.php'),
         ]);
 
         $this->files->cleanDirectory($this->app->path());
